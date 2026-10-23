@@ -28,7 +28,7 @@ Der Server hat weder WLAN noch eine Kabelverbindung zum Router. Deshalb hängt e
 
 ## Netzwerkaufbau
 
-![Netzwerkdiagramm](https://raw.githubusercontent.com/Tscheky0/homeserver-pihole-tailscale/main/docs/images/netzwerkdiagramm.png)
+![Netzwerkdiagramm](homeserver-pihole-tailscale/docs/images/netzwerkdiagramm.png)
 
 | Gerät oder Schnittstelle | Adresse | Rolle |
 |:--|:--|:--|
@@ -56,27 +56,28 @@ Der Server hat weder WLAN noch eine Kabelverbindung zum Router. Deshalb hängt e
 ## Projektstruktur
 
 ```
-homeserver-pihole-tailscale/
+PiHole-Tailscale-Server/
 ├── README.md
-├── docker/
-│   ├── pihole/
-│   │   ├── docker-compose.yml
-│   │   └── .env.example
-│   └── portainer/
-│       └── docker-compose.yml
-├── config/
-│   ├── netplan/50-cloud-init.yaml
-│   ├── ssh/00-hardening.conf
-│   └── systemd-resolved/resolved.conf.snippet
-└── docs/
-    ├── Homeserver_PiHole_Tailscale.pdf
-    ├── Homeserver_PiHole_Tailscale.docx
-    └── images/
+├── .gitignore
+└── homeserver-pihole-tailscale/
+    ├── docker/
+    │   ├── pihole/
+    │   │   ├── docker-compose.yml
+    │   │   └── .env.example
+    │   └── portainer/
+    │       └── docker-compose.yml
+    ├── config/
+    │   ├── netplan/50-cloud-init.yaml
+    │   ├── ssh/00-hardening.conf
+    │   └── systemd-resolved/resolved.conf.snippet
+    └── docs/
+        ├── Homeserver_PiHole_Tailscale.pdf
+        └── images/
 ```
 
 ## Nachbauen
 
-**Netzwerk des Servers einrichten.** Vorlage aus `config/netplan` nach `/etc/netplan/` kopieren, Adapternamen mit `ip a` prüfen und anwenden.
+**Netzwerk des Servers einrichten.** Vorlage aus `homeserver-pihole-tailscale/config/netplan` nach `/etc/netplan/` kopieren, Adapternamen mit `ip a` prüfen und anwenden.
 
 ```bash
 sudo chmod 600 /etc/netplan/50-cloud-init.yaml
@@ -88,7 +89,7 @@ ip route && ping -c 3 1.1.1.1
 
 ```bash
 sudo apt install docker.io docker-compose-v2
-cd docker/portainer && sudo docker compose up -d
+cd homeserver-pihole-tailscale/docker/portainer && sudo docker compose up -d
 sudo docker logs portainer 2>&1 | grep -i token   # Setup Token für den ersten Login
 ```
 
@@ -98,13 +99,13 @@ sudo docker logs portainer 2>&1 | grep -i token   # Setup Token für den ersten 
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 tailscale ip -4
-# Danach DNSStubListener=no setzen, siehe config/systemd-resolved
+# Danach DNSStubListener=no setzen, siehe homeserver-pihole-tailscale/config/systemd-resolved
 ```
 
 **Pi-hole starten.** `.env.example` nach `.env` kopieren, Adressen und Passwort eintragen.
 
 ```bash
-cd docker/pihole && cp .env.example .env && nano .env
+cd homeserver-pihole-tailscale/docker/pihole && cp .env.example .env && nano .env
 sudo docker compose up -d
 ```
 
@@ -118,7 +119,7 @@ type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh user@192.168.137.10 "mkdir -p ~/
 ```
 
 ```bash
-sudo cp config/ssh/00-hardening.conf /etc/ssh/sshd_config.d/
+sudo cp homeserver-pihole-tailscale/config/ssh/00-hardening.conf /etc/ssh/sshd_config.d/
 sudo sshd -t && sudo systemctl restart ssh
 ```
 
@@ -143,22 +144,22 @@ Die eigentliche Lernkurve. Jedes Problem wurde systematisch von unten nach oben 
 
 **Falsches Gateway in der Routingtabelle**
 
-![ip route](https://raw.githubusercontent.com/Tscheky0/homeserver-pihole-tailscale/main/docs/images/ip-route-falsches-gateway.png)
+![ip route](homeserver-pihole-tailscale/docs/images/ip-route-falsches-gateway.png)
 
 **Netplan Fehler durch alte Konfigurationsdatei**
 
-![Netplan Fehler](https://raw.githubusercontent.com/Tscheky0/homeserver-pihole-tailscale/main/docs/images/netplan-fehler.jpg)
+![Netplan Fehler](homeserver-pihole-tailscale/docs/images/netplan-fehler.jpg)
 
 **Blocklisten Download vorher und nachher**
 
-![Gravity Fehler](https://raw.githubusercontent.com/Tscheky0/homeserver-pihole-tailscale/main/docs/images/gravity-fehler.png)
-![Gravity Erfolg](https://raw.githubusercontent.com/Tscheky0/homeserver-pihole-tailscale/main/docs/images/gravity-erfolg.png)
+![Gravity Fehler](homeserver-pihole-tailscale/docs/images/gravity-fehler.png)
+![Gravity Erfolg](homeserver-pihole-tailscale/docs/images/gravity-erfolg.png)
 
 </details>
 
 ## Ergebnis
 
-![Pi-hole Query Log](https://raw.githubusercontent.com/Tscheky0/homeserver-pihole-tailscale/main/docs/images/pihole-querylog.png)
+![Pi-hole Query Log](homeserver-pihole-tailscale/docs/images/pihole-querylog.png)
 
 Werbe und Tracking Anfragen vom Handy werden über das Tailnet zuverlässig geblockt. Der Server ist komplett per SSH und Browser verwaltbar und von außen nicht angreifbar.
 
@@ -183,7 +184,7 @@ Server direkt ins Heimnetz bringen und Pi-hole in der FritzBox als DNS eintragen
 
 ## Ausführliche Dokumentation
 
-Die komplette Projektdokumentation mit allen Schritten und Screenshots liegt unter [`docs/Homeserver_PiHole_Tailscale.pdf`](https://github.com/Tscheky0/homeserver-pihole-tailscale/blob/main/docs/Homeserver_PiHole_Tailscale.pdf).
+Die komplette Projektdokumentation mit allen Schritten und Screenshots liegt unter [`Homeserver_PiHole_Tailscale.pdf`](homeserver-pihole-tailscale/docs/Homeserver_PiHole_Tailscale.pdf).
 
 ---
 
