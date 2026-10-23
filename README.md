@@ -141,7 +141,7 @@ Alle Designentscheidungen (Netz, Ports, HTTPS, RAM Budget, Proxy Hosts, Monitore
 ## Projektstruktur
 
 ```
-homeserver-pihole-tailscale/
+PiHole-Tailscale-Server/
 ├── README.md
 ├── docker/
 │   ├── pihole/                 DNS und Werbeblocker
