@@ -1,0 +1,25 @@
+# Prometheus Konfiguration. Umgebungsvariablen werden hier nicht ersetzt,
+# deshalb steht die LAN Adresse des Servers fest drin.
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: node
+    static_configs:
+      - targets: ["192.168.137.10:9100"]
+        labels:
+          instance: homeserver
+
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+
+  - job_name: pihole
+    static_configs:
+      - targets: ["pihole-exporter:9617"]

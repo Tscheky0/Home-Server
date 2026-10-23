@@ -1,0 +1,4 @@
+# Zugriff auf Container Status über den Socket Proxy (nur lesend)
+homeserver:
+  host: socket-proxy
+  port: 2375

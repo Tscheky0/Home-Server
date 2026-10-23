@@ -1,0 +1,75 @@
+# Nextcloud als eigene Cloud für Dateien, Fotos und Kalender
+# MariaDB als Datenbank, Redis für Cache und Dateisperren, eigener Container für Cron.
+# Nur die App hängt am Netz proxy, Datenbank und Redis bleiben im internen Netz.
+# Erreichbar als https://cloud.home über NPM.
+
+services:
+  db:
+    image: mariadb:11.4
+    container_name: nextcloud-db
+    restart: unless-stopped
+    mem_limit: 512m
+    command: --transaction-isolation=READ-COMMITTED
+    environment:
+      MARIADB_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MARIADB_DATABASE: nextcloud
+      MARIADB_USER: nextcloud
+      MARIADB_PASSWORD: "${MYSQL_PASSWORD}"
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - nextcloud-db:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    mem_limit: 128m
+
+  nextcloud:
+    image: nextcloud:stable-apache
+    container_name: nextcloud
+    restart: unless-stopped
+    mem_limit: 768m
+    depends_on:
+      - db
+      - redis
+    environment:
+      TZ: "${TZ}"
+      MYSQL_HOST: db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      REDIS_HOST: redis
+      NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER}"
+      NEXTCLOUD_ADMIN_PASSWORD: "${NEXTCLOUD_ADMIN_PASSWORD}"
+      # nextcloud ist der Containername, damit Homepage und Uptime Kuma intern zugreifen dürfen
+      NEXTCLOUD_TRUSTED_DOMAINS: "cloud.home nextcloud"
+      OVERWRITEPROTOCOL: https
+      OVERWRITEHOST: cloud.home
+      TRUSTED_PROXIES: "172.16.0.0/12"
+      PHP_MEMORY_LIMIT: 512M
+      PHP_UPLOAD_LIMIT: 10G
+    volumes:
+      - nextcloud-html:/var/www/html
+    networks:
+      - default
+      - proxy
+
+  cron:
+    image: nextcloud:stable-apache
+    container_name: nextcloud-cron
+    restart: unless-stopped
+    mem_limit: 128m
+    entrypoint: /cron.sh
+    depends_on:
+      - nextcloud
+    volumes:
+      - nextcloud-html:/var/www/html
+
+volumes:
+  nextcloud-db:
+  nextcloud-html:
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,8 @@
+.env
+*.bak
+~$*
+certs/
+*.key
+*.pem
+ZUGANGSDATEN.txt
+docker/homepage/config/logs/

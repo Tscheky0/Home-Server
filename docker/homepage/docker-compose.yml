@@ -1,0 +1,37 @@
+# Homepage als Startseite mit Kacheln und Live Widgets für alle Dienste
+# Der Docker Socket wird nicht direkt eingebunden, sondern über einen
+# Socket Proxy, der nur lesenden Zugriff auf Container erlaubt.
+# Erreichbar als https://dashboard.home über NPM.
+
+services:
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: homepage-socket-proxy
+    restart: unless-stopped
+    mem_limit: 64m
+    environment:
+      CONTAINERS: 1
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    mem_limit: 192m
+    depends_on:
+      - socket-proxy
+    env_file: .env
+    environment:
+      # homepage:3000 für den Monitor in Uptime Kuma
+      HOMEPAGE_ALLOWED_HOSTS: dashboard.home,homepage:3000
+    volumes:
+      - ./config:/app/config
+    networks:
+      - default
+      - proxy
+
+networks:
+  proxy:
+    external: true

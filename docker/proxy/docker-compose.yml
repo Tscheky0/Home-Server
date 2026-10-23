@@ -1,0 +1,34 @@
+# Nginx Proxy Manager als einzige Eingangstür für alle Weboberflächen
+# 443 auf LAN und Tailscale Adresse, die Admin Oberfläche (81) nur im LAN.
+# Port 80 belegt CasaOS, deshalb nur HTTPS (docs/ERWEITERUNG.md, E19).
+# Die Dienste selbst haben keine Host Ports, NPM erreicht sie über das Netz proxy.
+# Voraussetzung: docker network create proxy
+
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm
+    restart: unless-stopped
+    mem_limit: 256m
+    ports:
+      - "${SERVER_LAN_IP}:443:443"
+      - "${TAILSCALE_IP}:443:443"
+      - "${SERVER_LAN_IP}:81:81"
+    environment:
+      TZ: "${TZ}"
+      DISABLE_IPV6: "true"
+      INITIAL_ADMIN_EMAIL: "${NPM_ADMIN_EMAIL}"
+      INITIAL_ADMIN_PASSWORD: "${NPM_ADMIN_PASSWORD}"
+    volumes:
+      - npm-data:/data
+      - npm-letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
+
+volumes:
+  npm-data:
+  npm-letsencrypt:
+
+networks:
+  proxy:
+    external: true
