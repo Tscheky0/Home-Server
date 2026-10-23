@@ -1,0 +1,13 @@
+# /etc/netplan/50-cloud-init.yaml
+# Statische Adresse im Netz der Windows Internetverbindungsfreigabe (ICS)
+# Rechte setzen: sudo chmod 600 /etc/netplan/50-cloud-init.yaml
+network:
+  version: 2
+  ethernets:
+    enp6s0:
+      addresses: [192.168.137.10/24]
+      routes:
+        - to: default
+          via: 192.168.137.1
+      nameservers:
+        addresses: [192.168.137.1, 1.1.1.1]
