@@ -1,0 +1,84 @@
+# Kacheln für alle Dienste. Widgets greifen intern über das Netz proxy zu,
+# die Links (href) gehen über NPM mit HTTPS.
+
+- Netzwerk:
+    - Pi-hole:
+        icon: pi-hole.svg
+        href: https://pihole.home/admin/
+        description: DNS Werbeblocker
+        server: homeserver
+        container: pihole
+        widget:
+          type: pihole
+          url: http://pihole
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_PASSWORD}}"
+
+    - Nginx Proxy Manager:
+        icon: nginx-proxy-manager.svg
+        href: https://npm.home
+        description: Reverse Proxy und Zertifikate
+        server: homeserver
+        container: npm
+        widget:
+          type: npm
+          url: http://npm:81
+          username: "{{HOMEPAGE_VAR_NPM_USER}}"
+          password: "{{HOMEPAGE_VAR_NPM_PASSWORD}}"
+
+    - Portainer:
+        icon: portainer.svg
+        href: https://portainer.home
+        description: Container Verwaltung
+        server: homeserver
+        container: portainer
+        widget:
+          type: portainer
+          url: https://portainer:9443
+          env: "{{HOMEPAGE_VAR_PORTAINER_ENV}}"
+          key: "{{HOMEPAGE_VAR_PORTAINER_KEY}}"
+
+- Monitoring:
+    - Uptime Kuma:
+        icon: uptime-kuma.svg
+        href: https://kuma.home
+        description: Erreichbarkeit und Alarme
+        server: homeserver
+        container: uptime-kuma
+        widget:
+          type: uptimekuma
+          url: http://uptime-kuma:3001
+          slug: homeserver
+
+    - Grafana:
+        icon: grafana.svg
+        href: https://grafana.home
+        description: Live Diagramme
+        server: homeserver
+        container: grafana
+        widget:
+          type: grafana
+          url: http://grafana:3000
+          username: "{{HOMEPAGE_VAR_GRAFANA_USER}}"
+          password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
+
+    - Prometheus:
+        icon: prometheus.svg
+        description: Metriken, nur intern
+        server: homeserver
+        container: prometheus
+        widget:
+          type: prometheus
+          url: http://prometheus:9090
+
+- Dienste:
+    - Nextcloud:
+        icon: nextcloud.svg
+        href: https://cloud.home
+        description: Dateien, Fotos, Kalender
+        server: homeserver
+        container: nextcloud
+        widget:
+          type: nextcloud
+          url: http://nextcloud
+          key: "{{HOMEPAGE_VAR_NEXTCLOUD_TOKEN}}"

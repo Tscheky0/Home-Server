@@ -1,0 +1,38 @@
+# Pi-hole als netzwerkweiter DNS Werbeblocker
+# Port 53 und die Weboberfläche werden nur auf der LAN und der Tailscale Adresse
+# gebunden, damit sie niemals aus fremden Netzen erreichbar sind.
+# Alle Namen unter .home zeigen auf den Reverse Proxy (siehe docs/ERWEITERUNG.md, E5 und E6).
+# Das Passwort steht bewusst nicht hier, sondern wird einmalig gesetzt und nur als Hash gespeichert:
+#   docker exec -it pihole pihole setpassword
+
+services:
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    restart: unless-stopped
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    ports:
+      - "${SERVER_LAN_IP}:53:53/tcp"
+      - "${SERVER_LAN_IP}:53:53/udp"
+      - "${TAILSCALE_IP}:53:53/tcp"
+      - "${TAILSCALE_IP}:53:53/udp"
+      - "${SERVER_LAN_IP}:8080:80/tcp"
+    environment:
+      TZ: "${TZ}"
+      FTLCONF_dns_listeningMode: "all"
+      FTLCONF_dns_upstreams: "1.1.1.1;9.9.9.9"
+      FTLCONF_misc_dnsmasq_lines: "address=/home/${PROXY_IP}"
+    volumes:
+      - pihole-data:/etc/pihole
+    networks:
+      - default
+      - proxy
+
+volumes:
+  pihole-data:
+
+networks:
+  proxy:
+    external: true

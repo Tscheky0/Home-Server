@@ -1,0 +1,103 @@
+# Monitoring mit Prometheus und Grafana
+# Node Exporter liefert Host Metriken, cAdvisor Container Metriken,
+# pihole-exporter die Pi-hole Statistiken über die v6 API.
+# Nur Grafana ist über NPM erreichbar (https://grafana.home), Prometheus bleibt intern.
+# Vor dem ersten Start: ./fetch-dashboards.sh ausführen.
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    mem_limit: 512m
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - default
+      - proxy
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    mem_limit: 384m
+    depends_on:
+      - prometheus
+    environment:
+      TZ: "${TZ}"
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+      GF_SERVER_ROOT_URL: https://grafana.home
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - default
+      - proxy
+
+  # Host Netzwerk für echte Netzwerk Metriken, lauscht aber nur auf der LAN Adresse
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    mem_limit: 64m
+    network_mode: host
+    pid: host
+    command:
+      - --path.rootfs=/host
+      - --web.listen-address=${SERVER_LAN_IP}:9100
+    volumes:
+      - /:/host:ro,rslave
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:v0.60.3
+    container_name: cadvisor
+    restart: unless-stopped
+    mem_limit: 192m
+    privileged: true
+    devices:
+      - /dev/kmsg
+    # Plattenbelegung pro Container abgeschaltet: der Scan dauerte auf dem alten PC
+    # mehrere Minuten und hat die Festplatte dauerhaft ausgelastet
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=30s
+      - --store_container_labels=false
+      - --disable_metrics=disk,diskIO,percpu,sched,tcp,udp,advtcp,process,referenced_memory,cpu_topology,resctrl,hugetlb,memory_numa
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+  pihole-exporter:
+    image: ekofr/pihole-exporter:latest
+    container_name: pihole-exporter
+    restart: unless-stopped
+    mem_limit: 64m
+    environment:
+      PIHOLE_HOSTNAME: pihole
+      PIHOLE_PORT: "80"
+      PIHOLE_PROTOCOL: http
+      PIHOLE_PASSWORD: "${PIHOLE_PASSWORD}"
+      PORT: "9617"
+    networks:
+      - default
+      - proxy
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  proxy:
+    external: true

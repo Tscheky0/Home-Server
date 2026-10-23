@@ -1,0 +1,28 @@
+# Portainer CE zur Verwaltung von Containern und Stacks im Browser
+# Achtung: Portainer hat Zugriff auf den Docker Socket und damit volle Kontrolle
+# über den Server. Deshalb nur HTTPS (9443) und nur an die LAN Adresse binden,
+# kein unverschlüsselter Port 9000. Aus dem Tailnet über https://portainer.home.
+# Version fest, weil Portainer nach einem Downgrade seine Datenbank nicht mehr öffnet.
+
+services:
+  portainer:
+    image: portainer/portainer-ce:2.45.3
+    container_name: portainer
+    restart: always
+    ports:
+      - "${SERVER_LAN_IP:-192.168.137.10}:9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - default
+      - proxy
+
+volumes:
+  # fester Name, damit das bestehende Volume weiterverwendet wird
+  portainer_data:
+    name: portainer_data
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,18 @@
+title: Homeserver
+theme: dark
+color: slate
+headerStyle: boxed
+language: de
+statusStyle: dot
+hideVersion: true
+
+layout:
+  Netzwerk:
+    style: row
+    columns: 3
+  Monitoring:
+    style: row
+    columns: 3
+  Dienste:
+    style: row
+    columns: 3

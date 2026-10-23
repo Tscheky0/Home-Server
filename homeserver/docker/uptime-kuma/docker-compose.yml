@@ -1,0 +1,25 @@
+# Uptime Kuma überwacht alle Dienste und meldet Ausfälle per ntfy aufs Handy.
+# Kein Host Port, erreichbar als https://kuma.home über NPM.
+# Monitore und Benachrichtigung siehe docs/ERWEITERUNG.md, Abschnitt 6.
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: unless-stopped
+    mem_limit: 256m
+    environment:
+      TZ: "${TZ:-Europe/Vienna}"
+      # überspringt die Datenbank Auswahl beim ersten Start
+      UPTIME_KUMA_DB_TYPE: sqlite
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - proxy
+
+volumes:
+  uptime-kuma-data:
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,7 @@
+- Verwaltung:
+    - Tailscale:
+        - icon: tailscale.svg
+          href: https://login.tailscale.com/admin/machines
+    - GitHub Repo:
+        - icon: github.svg
+          href: https://github.com/Tscheky0/homeserver-pihole-tailscale
