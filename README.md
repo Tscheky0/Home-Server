@@ -172,7 +172,7 @@ Home-Server/
 │   └── archive-film.sh         gemeinfreien Film von archive.org für Jellyfin laden
 └── docs/
     ├── ERWEITERUNG.md          Entscheidungen zur Erweiterung
-    ├── Homeserver_Doku.pdf
+    ├── Homeserver_Dokumentation.pdf
     └── images/
 ```
 
@@ -358,7 +358,7 @@ Server direkt ins Heimnetz bringen und Pi-hole in der FritzBox als DNS eintragen
 
 | Dokument | Inhalt |
 |:--|:--|
-| [`docs/Homeserver_Doku.pdf`](docs/Homeserver_Doku.pdf) | Gesamte Projektdokumentation mit allen Schritten und Screenshots |
+| [`docs/Homeserver_Dokumentation.pdf`](docs/Homeserver_Dokumentation.pdf) | Gesamte Projektdokumentation mit allen Schritten und Screenshots |
 | [`docs/ERWEITERUNG.md`](docs/ERWEITERUNG.md) | Alle Entscheidungen der Erweiterung mit Begründung |
 
 ---
