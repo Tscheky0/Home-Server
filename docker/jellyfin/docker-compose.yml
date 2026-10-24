@@ -1,0 +1,34 @@
+# Jellyfin als eigener Streaming Dienst für Filme und Serien
+# Kein Host Port, erreichbar als https://jellyfin.home über NPM (Websockets einschalten).
+# Die Medien liegen auf dem Host in MEDIA_DIR und sind nur lesend eingebunden.
+# /dev/dri: die Grafikeinheit der CPU übernimmt das Umwandeln von Videos (Intel QSV / VAAPI),
+# damit die 4 alten Kerne nicht voll ausgelastet werden.
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    mem_limit: 768m
+    user: "1000:1000"
+    group_add:
+      - "${RENDER_GID:-993}"
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      TZ: "${TZ}"
+      JELLYFIN_PublishedServerUrl: https://jellyfin.home
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - "${MEDIA_DIR}:/media:ro"
+    networks:
+      - proxy
+
+volumes:
+  jellyfin-config:
+  jellyfin-cache:
+
+networks:
+  proxy:
+    external: true

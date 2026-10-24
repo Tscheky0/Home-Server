@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-NAMES=(npm.home pihole.home portainer.home kuma.home cloud.home grafana.home dashboard.home)
+NAMES=(npm.home pihole.home portainer.home kuma.home cloud.home grafana.home dashboard.home jellyfin.home cockpit.home)
 export CAROOT="${CAROOT:-$HOME/.local/share/mkcert}"
 export PATH="$HOME/.local/bin:$PATH"
 

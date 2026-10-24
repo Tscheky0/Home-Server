@@ -47,6 +47,8 @@ Der Server hat weder WLAN noch eine Kabelverbindung zum Router. Er hängt per LA
 | Grafana | `https://grafana.home` | Live Diagramme zu Server, Containern und Pi-hole |
 | Nextcloud | `https://cloud.home` | Eigene Cloud für Dateien, Fotos und Kalender |
 | Portainer | `https://portainer.home` | Container und Stacks im Browser verwalten |
+| Cockpit | `https://cockpit.home` | Server Verwaltung im Browser: Logs, Firewall Meldungen, Updates, Terminal |
+| Jellyfin | `https://jellyfin.home` | Eigener Streaming Dienst, gemeinfreie Filme von archive.org |
 
 **Startseite mit Live Werten aller Dienste**
 
@@ -149,6 +151,7 @@ PiHole-Tailscale-Server/
 │   ├── proxy/                  Nginx Proxy Manager
 │   ├── uptime-kuma/            Monitoring, setup-kuma.js legt alle Monitore an
 │   ├── nextcloud/              App, MariaDB, Redis, Cron
+│   ├── jellyfin/               Filme und Serien streamen
 │   ├── monitoring/             Prometheus, Grafana, Exporter
 │   │   ├── prometheus/prometheus.yml
 │   │   ├── grafana/provisioning/
@@ -161,9 +164,14 @@ PiHole-Tailscale-Server/
 │   ├── sysctl/99-nonlocal-bind.conf
 │   └── systemd-resolved/resolved.conf.snippet
 ├── scripts/
-│   └── make-certs.sh           eigene CA und Zertifikat für *.home
+│   ├── backup.sh               nächtliches Backup aller Volumes, Configs und der CA
+│   ├── firewall.sh             ufw Regeln mit Schutz gegen Aussperren
+│   ├── install-cockpit.sh      Cockpit hinter NPM, ohne NetworkManager
+│   ├── make-certs.sh           eigene CA und Zertifikat für *.home
+│   └── archive-film.sh         gemeinfreien Film von archive.org für Jellyfin laden
 └── docs/
     ├── ERWEITERUNG.md          Entscheidungen zur Erweiterung
+    ├── Homeserver_Dokumentation.docx
     ├── Homeserver_Doku.pdf
     └── images/
 ```
@@ -332,7 +340,9 @@ Werbe und Tracking Anfragen vom Handy werden über das Tailnet zuverlässig gebl
 | `mem_limit` auf allen neuen Containern | Kein Dienst kann die 4 GB RAM aufbrauchen |
 | SSH nur mit Ed25519 Schlüssel, Passwort und Root Login aus | Schutz gegen Brute Force |
 | Device approval im Tailnet | Neue Geräte brauchen manuelle Freigabe |
+| ufw (`scripts/firewall.sh`): SSH, CasaOS und Samba nur aus LAN und Tailnet, Node Exporter nur aus Docker Netzen | Dienste direkt am Host sind nicht mehr auf allen Schnittstellen offen |
 | Passwörter nur in `.env`, per `.gitignore` ausgeschlossen | Keine Zugangsdaten im Repo |
+| Backup jede Nacht um 3:30 (`scripts/backup.sh`), Nextcloud Datenbank als SQL Dump, 3 Tage aufbewahrt | Daten nach Fehlern oder kaputten Updates wiederherstellbar |
 
 ## Was ich gelernt habe
 
@@ -342,13 +352,14 @@ In der Erweiterung: wie ein Reverse Proxy mehrere Dienste hinter einer Adresse b
 
 ## Ausblick
 
-Server direkt ins Heimnetz bringen und Pi-hole in der FritzBox als DNS eintragen, automatische Backups der Docker Volumes (vor allem Nextcloud), eine Firewall mit `ufw` und eine SSD statt der HDD.
+Server direkt ins Heimnetz bringen und Pi-hole in der FritzBox als DNS eintragen, Backups zusätzlich auf ein zweites Gerät kopieren und eine SSD statt der HDD.
 
 ## Ausführliche Dokumentation
 
 | Dokument | Inhalt |
 |:--|:--|
-| [`docs/Homeserver_Doku.pdf`](docs/Homeserver_Doku.pdf) | Gesamte Projektdokumentation inklusive Erweiterung |
+| [`docs/Homeserver_Dokumentation.docx`](docs/Homeserver_Dokumentation.docx) | Gesamte Projektdokumentation, Teil 1 bis 3 |
+| [`docs/Homeserver_Doku.pdf`](docs/Homeserver_Doku.pdf) | Projektdokumentation als PDF |
 | [`docs/ERWEITERUNG.md`](docs/ERWEITERUNG.md) | Alle Entscheidungen der Erweiterung mit Begründung |
 
 ---

@@ -1,0 +1,180 @@
+# Alarmregeln für den Server, Benachrichtigung per ntfy aufs Handy (gleiches Topic wie Uptime Kuma).
+# NTFY_TOPIC kommt aus docker/monitoring/.env. Grafana ersetzt Umgebungsvariablen in dieser Datei,
+# deshalb keine weiteren Dollarzeichen verwenden.
+# ntfy formatiert die Grafana Nachricht über das eingebaute Template "grafana" lesbar.
+
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: ntfy Handy
+    receivers:
+      - uid: ntfy-handy
+        type: webhook
+        settings:
+          url: https://ntfy.sh/${NTFY_TOPIC}?template=grafana
+          httpMethod: POST
+
+policies:
+  - orgId: 1
+    receiver: ntfy Handy
+    group_by: [alertname]
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 12h
+
+groups:
+  - orgId: 1
+    name: Server
+    folder: Homeserver
+    interval: 1m
+    rules:
+      - uid: disk-voll
+        title: Festplatte fast voll
+        condition: C
+        for: 10m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: Die System Partition ist zu mehr als 85 Prozent belegt.
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: 100 - node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} / node_filesystem_size_bytes{mountpoint="/",fstype!="rootfs"} * 100
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [85] }
+
+      - uid: ram-knapp
+        title: Arbeitsspeicher knapp
+        condition: C
+        for: 10m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: Weniger als 10 Prozent RAM frei, Container könnten abstürzen.
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: lt, params: [10] }
+
+      - uid: cpu-dauerlast
+        title: CPU dauerhaft ausgelastet
+        condition: C
+        for: 15m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: Die CPU ist seit 15 Minuten über 90 Prozent ausgelastet.
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: 100 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [90] }
+
+      - uid: swap-voll
+        title: Swap stark belegt
+        condition: C
+        for: 15m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: Mehr als 80 Prozent Swap belegt, der Server lagert auf die langsame HDD aus.
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) * 100
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [80] }
+
+      - uid: messquelle-weg
+        title: Messquelle nicht erreichbar
+        condition: C
+        for: 5m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: Prometheus erreicht eine Messquelle nicht mehr (Node Exporter, cAdvisor oder Pi-hole Exporter).
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: up
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: lt, params: [1] }

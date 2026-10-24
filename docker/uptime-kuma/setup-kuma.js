@@ -42,6 +42,8 @@ const monitors = [
     { name: "Grafana", type: "http", url: "http://grafana:3000/api/health" },
     { name: "Prometheus", type: "http", url: "http://prometheus:9090/-/healthy" },
     { name: "Homepage", type: "http", url: "http://homepage:3000" },
+    { name: "Jellyfin", type: "keyword", url: "http://jellyfin:8096/health", keyword: "Healthy" },
+    { name: "Cockpit", type: "http", url: `http://${LAN}:9090/ping` },
     { name: "Internet", type: "ping", hostname: "1.1.1.1" },
 ];
 

@@ -35,6 +35,8 @@ services:
       GF_SERVER_ROOT_URL: https://grafana.home
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
+      # für die Alarme in grafana/provisioning/alerting
+      NTFY_TOPIC: "${NTFY_TOPIC}"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro

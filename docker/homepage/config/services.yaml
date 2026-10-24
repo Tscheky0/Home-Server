@@ -26,6 +26,12 @@
           username: "{{HOMEPAGE_VAR_NPM_USER}}"
           password: "{{HOMEPAGE_VAR_NPM_PASSWORD}}"
 
+    - Cockpit:
+        icon: cockpit.svg
+        href: https://cockpit.home
+        description: Server Verwaltung, Logs, Updates
+        siteMonitor: http://192.168.137.10:9090
+
     - Portainer:
         icon: portainer.svg
         href: https://portainer.home
@@ -82,3 +88,10 @@
           type: nextcloud
           url: http://nextcloud
           key: "{{HOMEPAGE_VAR_NEXTCLOUD_TOKEN}}"
+
+    - Jellyfin:
+        icon: jellyfin.svg
+        href: https://jellyfin.home
+        description: Filme und Serien
+        server: homeserver
+        container: jellyfin
