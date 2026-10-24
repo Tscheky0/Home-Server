@@ -31,8 +31,9 @@ Der Server hat weder WLAN noch eine Kabelverbindung zum Router. Er hängt per LA
 |:--|:--|
 | Geblockte Domains | **280.282** (StevenBlack und Hagezi Pro) |
 | Offene Ports ins Internet | **0** |
-| Container | **15** in 7 Stacks |
-| Überwachte Dienste | **10** Monitore, Alarm per Push aufs Handy |
+| Container | **16** in 8 Stacks |
+| Überwachte Dienste | **12** Monitore und **5** Grafana Alarme, Push aufs Handy |
+| Backup | Jede Nacht, Nextcloud Datenbank als SQL Dump, 3 Tage aufbewahrt |
 | Hardware | Alter PC, 4 Kerne, 4 GB RAM, 500 GB HDD |
 | Fernzugriff | Tailscale, SSH nur mit Ed25519 Schlüssel |
 
@@ -171,7 +172,6 @@ Home-Server/
 │   └── archive-film.sh         gemeinfreien Film von archive.org für Jellyfin laden
 └── docs/
     ├── ERWEITERUNG.md          Entscheidungen zur Erweiterung
-    ├── Homeserver_Dokumentation.docx
     ├── Homeserver_Doku.pdf
     └── images/
 ```
@@ -358,8 +358,7 @@ Server direkt ins Heimnetz bringen und Pi-hole in der FritzBox als DNS eintragen
 
 | Dokument | Inhalt |
 |:--|:--|
-| [`docs/Homeserver_Dokumentation.docx`](docs/Homeserver_Dokumentation.docx) | Gesamte Projektdokumentation, Teil 1 bis 3 |
-| [`docs/Homeserver_Doku.pdf`](docs/Homeserver_Doku.pdf) | Projektdokumentation als PDF |
+| [`docs/Homeserver_Doku.pdf`](docs/Homeserver_Doku.pdf) | Gesamte Projektdokumentation mit allen Schritten und Screenshots |
 | [`docs/ERWEITERUNG.md`](docs/ERWEITERUNG.md) | Alle Entscheidungen der Erweiterung mit Begründung |
 
 ---

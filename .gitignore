@@ -5,4 +5,6 @@ certs/
 *.key
 *.pem
 ZUGANGSDATEN.txt
+# Word Quelle der Doku bleibt lokal, im Repo liegt nur die PDF
+docs/*.docx
 docker/homepage/config/logs/
